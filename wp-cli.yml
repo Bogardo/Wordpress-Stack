@@ -1,0 +1,9 @@
+path: public/app/
+require:
+  - config/commands/ConfigCommand.php
+core install:
+  title: Wordpress Project
+  url:
+  admin_user:
+  admin_email:
+  admin_password:

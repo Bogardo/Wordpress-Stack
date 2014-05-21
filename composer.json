@@ -1,0 +1,14 @@
+{
+    "name": "bogardo/wordpress-stack",
+    "description": "Wordpress Stack",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Bogardo",
+            "email": "chris@bogardo.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4"
+    }
+}

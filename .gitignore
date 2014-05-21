@@ -1,0 +1,12 @@
+# Environment
+.idea
+
+# Composer Vendor Directory
+vendor
+
+public/app
+public/content/*.log
+config/environments/development.php
+config/environments/testing.php
+config/environments/staging.php
+config/environments/production.php
