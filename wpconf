@@ -1,0 +1,109 @@
+#!/usr/bin/php
+
+<?php
+if (!defined('DS'))
+{
+	define('DS', DIRECTORY_SEPARATOR);
+}
+
+if (!isset($argv[1]) && !isset($argv[2]))
+{
+	return false;
+}
+
+$method = $argv[1];
+$param  = $argv[2];
+
+
+Class Config
+{
+	public $allowedEnvironments = array(
+		'development',
+		'testing',
+		'staging',
+		'production'
+	);
+
+	public function create($param)
+	{
+		$env     = strtolower($param);
+		$envDir  = __DIR__ . DS . 'config' . DS . 'environments' . DS;
+		$envPath = $envDir . $env . '.php';
+
+		if (!in_array($env, $this->allowedEnvironments))
+		{
+			$this->message('Specified environment not allowed. Allowed: '. implode(', ', $this->allowedEnvironments));
+
+			return false;
+		}
+
+		if (is_file($envPath))
+		{
+			$this->message(sprintf('Configuration file already exists at "%s"', $envPath));
+
+			return false;
+		}
+
+		$this->message(sprintf('Creating new configuration file at "%s"', $envPath));
+		copy($envDir . '_default.php', $envPath);
+
+		$configContent = file_get_contents($envPath);
+
+		//Set Salts
+		$this->message('Generating new salts');
+		$salts = file_get_contents("https://api.wordpress.org/secret-key/1.1/salt/");
+		$configContent = str_replace("#{{SALTS}}#", $salts, $configContent);
+
+		//Set Url
+		$prefix = $this->_prefix($env);
+		$url    = $this->_geturl();
+		if ($url) {
+			$url = str_replace("http://", "http://" . $prefix, $url);
+			$configContent = str_replace("define('WP_HOME', '');", "define('WP_HOME', '{$url}');", $configContent);
+		}
+
+		file_put_contents($envPath, $configContent);
+
+		$this->message('Configuration created');
+	}
+
+	protected function _geturl()
+	{
+		$yml = file_get_contents('wp-cli.yml');
+		preg_match("~url:(.*)~", $yml, $matches);
+		if (isset($matches[1])){
+			$url = trim($matches[1]);
+			return $url;
+		}
+		return false;
+	}
+
+	protected function _prefix($env)
+	{
+		//Set Url
+		switch ($env)
+		{
+			case "development":
+				$prefix = "dev.";
+				break;
+			case "testing":
+				$prefix = "test.";
+				break;
+			case "staging":
+				$prefix = "staging.";
+				break;
+			case "production":
+				$prefix = "";
+				break;
+		}
+		return $prefix;
+	}
+
+	public function message($content)
+	{
+		echo $content . "\n";
+	}
+}
+
+$config = new Config();
+$config->$method($param);

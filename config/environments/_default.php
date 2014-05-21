@@ -12,7 +12,7 @@ define('DB_HOST',       "");
  *
  * Full url including http://...
  */
-define('WP_HOME', "");
+define('WP_HOME', '');
 
 /**
  * WordPress Localized Language
